@@ -5,19 +5,13 @@ import six
 from six.moves.urllib import parse
 
 from .. import exceptions
+from .util import _join_plex, image_getter
 
 try:
     from lxml import etree as ET
 except ImportError:
     from xml.etree import ElementTree as ET
 NO_DEFAULT = object()
-
-
-def _join_plex(x, y):
-    url = parse.urljoin(x, y)
-    if not url.endswith('/'):
-        url = url + '/'
-    return url
 
 
 class RequestBase(object):
@@ -164,6 +158,9 @@ class Directory(BaseDirectory):
         self._data.update(element.attrib)
         for child in element.getchildren():
             self.process_sub_element(child)
+
+    art = image_getter('art')
+    thumb = image_getter('thumb')
 
     def process_sub_element(self, element):
         self.process_element(element)
