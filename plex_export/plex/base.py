@@ -102,6 +102,7 @@ class RequestBase(object):
 
 class BaseDirectory(RequestBase):
     _viewgroups = {}
+    _keygroups = {}
     _default_viewgroup = None
 
     def __init__(self, base, relative=None):
@@ -128,6 +129,12 @@ class BaseDirectory(RequestBase):
         child = self._child
         if element.tag in self._viewgroups:
             child = self._viewgroups[element.tag]
+        key = element.attrib.get('key', None)
+        if key:
+            url_key = _join_plex(self._url_parts[2], key)
+            if url_key in self._keygroups:
+                child = self._keygroups[url_key]
+        item = child(self, key, element)
         self._items.append(item)
         for index in item.indices:
             self._itemsdict[index] = item
@@ -313,5 +320,12 @@ def register_viewgroup(name):
 def register_datanode(name):
     def _inner(x):
         DataNode._viewgroups[name] = x
+        return x
+    return _inner
+
+
+def register_keynode(name):
+    def _inner(x):
+        BaseDirectory._keygroups[name] = x
         return x
     return _inner
