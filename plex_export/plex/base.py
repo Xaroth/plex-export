@@ -47,6 +47,7 @@ class RequestBase(object):
     def __repr__(self):
         scheme, netloc, path, qs, fragment = self._url_parts
         return "<%s: %s%s>" % (self.__class__.__name__, netloc, path)
+        return "<%s: %s%s%s>" % (self.__class__.__name__, netloc, '' if path.startswith('/') else '/', path)
 
     @property
     def url(self):
