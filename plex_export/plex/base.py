@@ -151,7 +151,8 @@ class BaseDirectory(RequestBase):
     def __dir__(self):
         base = list(super(BaseDirectory, self).__dir__())
         found = list(self._itemsdict.keys())
-        return base + found
+        data = list(self._data.keys())
+        return sorted(list(set(base + found + data)))
 
     def __len__(self):
         return len(self.items)
