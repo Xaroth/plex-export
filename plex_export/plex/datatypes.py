@@ -52,3 +52,11 @@ class ProducerItem(RoleItem):
 @register_viewgroup('Collection')
 class CollectionItem(DataNode):
     pass
+
+
+@register_viewgroup('Server')
+class ServerItem(DataNode):
+    @property
+    def value(self):
+        return self.name
+    
