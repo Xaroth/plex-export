@@ -71,11 +71,14 @@ class RequestBase(object):
     def has_token(self):
         return self._has_token
 
+    def _request(self):
+        return requests.get(self.url, headers=self._headers or DEFAULT_HEADERS)
+
     @property
     def xml(self):
         if self._xml is not None:
             return self._xml
-        resp = requests.get(self.url, headers=self._headers or DEFAULT_HEADERS)
+        resp = self._request()
         if resp.status_code == 401:
             if not self.has_token:
                 raise exceptions.TokenRequiredException()
