@@ -229,6 +229,7 @@ class SelfLoading(object):
         return BaseDirectory.process_root(self, element)
 
 
+@six.python_2_unicode_compatible
 class DataNode(MultiValue):
     viewgroups = {}
     default_viewgroup = None
@@ -258,11 +259,8 @@ class DataNode(MultiValue):
         item = child(self, element.attrib.get('key', None), element)
         self._items.append(item)
 
-    # def get(self, key, default=NO_DEFAULT):
-    #     if default is NO_DEFAULT:
-    #         return self._data[key]
-    #     return self._data.get(key, default)
-    # __getattr__ = __getitem__ = get
+    def __str__(self):
+        return self.value
 
     @property
     def data(self):
