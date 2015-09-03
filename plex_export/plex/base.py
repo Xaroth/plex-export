@@ -54,6 +54,11 @@ class RequestBase(object):
             self._has_token = 'X-Plex-Token' in parse.parse_qs(self._url_parts[3])
         self._url = parse.urlunsplit(self._url_parts)
 
+    def __dir__(self):
+        attrs = [x for x in self.__dict__.keys() if not x.startswith('_')]
+        attrs.extend(dir(self.__class__))
+        return list(set(attrs))
+
     def __repr__(self):
         scheme, netloc, path, qs, fragment = self._url_parts
         return "<%s: %s%s%s>" % (self.__class__.__name__, netloc, '' if path.startswith('/') else '/', path)
@@ -133,6 +138,11 @@ class BaseDirectory(RequestBase):
             return self._data[key]
         return self._data.get(key, default)
     __getattr__ = __getitem__ = get
+
+    def __dir__(self):
+        base = list(super(BaseDirectory, self).__dir__())
+        found = list(self._itemsdict.keys())
+        return base + found
 
     def __len__(self):
         return len(self.items)
