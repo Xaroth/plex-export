@@ -221,11 +221,11 @@ class MultiValue(object):
 
 class SelfLoading(object):
     def process_root(self, element):
-        subtag = element.xpath('//MediaContainer/*[1]')
-        if subtag:
+        subtags = element.getchildren()
+        if subtags:
             self._items = []
             self._itemsdict = {}
-            element = subtag[0]
+            element = subtags[0]
         return BaseDirectory.process_root(self, element)
 
 
