@@ -56,7 +56,11 @@ class ImgHelper(object):
 
 def image_getter(attr):
     def __inner(self):
-        img = getattr(self, '_img_%s' % attr, None)
+        img = None
+        try:
+            img = getattr(self, '_img_%s' % attr, None)
+        except KeyError:
+            pass
         if img:
             return img
         value = self.get(attr)
