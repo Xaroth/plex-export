@@ -154,6 +154,10 @@ class BaseDirectory(RequestBase):
         return iter(self.items)
 
     @property
+    def first(self):
+        return self.items[0]
+
+    @property
     def items(self):
         self.load()
         return self._items
