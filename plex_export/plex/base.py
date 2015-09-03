@@ -101,13 +101,13 @@ class RequestBase(object):
 
 
 class BaseDirectory(RequestBase):
-    viewgroups = {}
-    default_viewgroup = None
+    _viewgroups = {}
+    _default_viewgroup = None
 
     def __init__(self, base, relative=None):
         self._items = []
         self._itemsdict = {}
-        self._child = self.default_viewgroup
+        self._child = self._default_viewgroup
         self._data = {}
         super(BaseDirectory, self).__init__(base, relative=relative)
 
@@ -119,16 +119,15 @@ class BaseDirectory(RequestBase):
 
     def process_root(self, element):
         viewgroup = element.attrib.get('viewGroup', None)
-        if viewgroup in self.viewgroups:
-            self._child = self.viewgroups[viewgroup]
+        if viewgroup in self._viewgroups:
+            self._child = self._viewgroups[viewgroup]
         self._data.update(element.attrib)
         return element
 
     def process_element(self, element):
         child = self._child
-        if element.tag in self.viewgroups:
-            child = self.viewgroups[element.tag]
-        item = child(self, element.attrib.get('key', None), element)
+        if element.tag in self._viewgroups:
+            child = self._viewgroups[element.tag]
         self._items.append(item)
         for index in item.indices:
             self._itemsdict[index] = item
@@ -219,7 +218,7 @@ class Directory(BaseDirectory):
             return
         item = search_item[0]
         return self.__class__(item, '?query=%s' % query, item.element)
-BaseDirectory.default_viewgroup = Directory
+BaseDirectory._default_viewgroup = Directory
 
 
 class MultiValue(object):
@@ -248,8 +247,8 @@ class SelfLoading(object):
 
 @six.python_2_unicode_compatible
 class DataNode(MultiValue):
-    viewgroups = {}
-    default_viewgroup = None
+    _viewgroups = {}
+    _default_viewgroup = None
 
     def __init__(self, base, relative=None, element=None):
         self._element = element
@@ -270,9 +269,9 @@ class DataNode(MultiValue):
         pass
 
     def process_element(self, element):
-        child = self.default_viewgroup
-        if element.tag in self.viewgroups:
-            child = self.viewgroups[element.tag]
+        child = self._default_viewgroup
+        if element.tag in self._viewgroups:
+            child = self._viewgroups[element.tag]
         item = child(self, element.attrib.get('key', None), element)
         self._items.append(item)
 
@@ -301,18 +300,18 @@ class DataNode(MultiValue):
 
     def get_indices(self):
         return [self.element.tag]
-DataNode.default_viewgroup = DataNode
+DataNode._default_viewgroup = DataNode
 
 
 def register_viewgroup(name):
     def _inner(x):
-        BaseDirectory.viewgroups[name] = x
+        BaseDirectory._viewgroups[name] = x
         return x
     return _inner
 
 
 def register_datanode(name):
     def _inner(x):
-        DataNode.viewgroups[name] = x
+        DataNode._viewgroups[name] = x
         return x
     return _inner
