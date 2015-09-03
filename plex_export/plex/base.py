@@ -11,7 +11,15 @@ try:
     from lxml import etree as ET
 except ImportError:
     from xml.etree import ElementTree as ET
+try:
+    from ..version_info import __version__
+except ImportError:
+    __version__ = '0.0.0'
 NO_DEFAULT = object()
+
+DEFAULT_HEADERS = {
+    'X-Plex-Device-Name': 'plex-export (%s)' % __version__
+}
 
 
 class RequestBase(object):
@@ -22,6 +30,7 @@ class RequestBase(object):
         self._loaded = False
         self._xml = None
         self._url_parts = None
+        self._headers = None
         if isinstance(base, six.string_types):
             base_url = base
             self._url_parts = list(parse.urlsplit(base_url))
@@ -29,6 +38,7 @@ class RequestBase(object):
             base_url = base.url
             self._has_token = base.has_token
             self._url_parts = base._url_parts[:]
+            self._headers = base._headers
         if relative:
             scheme, netloc, path, qs, fragment = parse.urlsplit(relative)
             if path:
@@ -46,7 +56,6 @@ class RequestBase(object):
 
     def __repr__(self):
         scheme, netloc, path, qs, fragment = self._url_parts
-        return "<%s: %s%s>" % (self.__class__.__name__, netloc, path)
         return "<%s: %s%s%s>" % (self.__class__.__name__, netloc, '' if path.startswith('/') else '/', path)
 
     @property
@@ -61,7 +70,7 @@ class RequestBase(object):
     def xml(self):
         if self._xml is not None:
             return self._xml
-        resp = requests.get(self.url)
+        resp = requests.get(self.url, headers=self._headers or DEFAULT_HEADERS)
         if resp.status_code == 401:
             if not self.has_token:
                 raise exceptions.TokenRequiredException()
@@ -147,6 +156,23 @@ class BaseDirectory(RequestBase):
 
 
 class PlexServer(BaseDirectory):
+    @property
+    def headers(self):
+        return self._headers
+
+    @headers.setter
+    def headers(self, value):
+        if not isinstance(value, dict):
+            raise TypeError("headers should be a dict")
+        self._headers = value
+
+    def add_header(self, header, value):
+        self._headers = self._headers or dict(DEFAULT_HEADERS.items())
+        if value is None and header in self._headers:
+            del self._headers[header]
+        else:
+            self._headers[header] = value
+
     def __repr__(self):
         scheme, netloc, path, qs, fragment = self._url_parts
         return "<%s: %s (%s)>" % (self.__class__.__name__, self.friendlyName, netloc)
