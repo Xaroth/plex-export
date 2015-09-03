@@ -33,7 +33,7 @@ CLASSIFIERS = """
 PACKAGES_EXCLUDE = ['tests', 'tests.*', 'docs', 'docs.*']
 
 CONSOLE_SCRIPTS = [
-
+    'plex-export = plex_export:export',
 ]
 
 EXTRA = {}
