@@ -1,5 +1,7 @@
 from __future__ import unicode_literals, absolute_import
-from .base import register_datanode, register_viewgroup, SelfLoading, MultiValue, Directory, DataNode, image_getter
+from .base import register_datanode, register_viewgroup, register_keynode, SelfLoading, MultiValue, Directory, DataNode, image_getter
+
+import six
 
 
 @register_viewgroup('Video')
@@ -59,4 +61,27 @@ class ServerItem(DataNode):
     @property
     def value(self):
         return self.name
-    
+
+
+@register_keynode('servers/')
+class ServerListing(Directory):
+    def __iter__(self):
+        return iter(self.items)
+
+    def __len__(self):
+        return len(self.items)
+
+    def __getitem__(self, index):
+        if isinstance(index, six.integer_types):
+            return self.items[index]
+        elif isinstance(index, six.string_types):
+            for item in self.items:
+                if item.name == index:
+                    return item
+        raise IndexError(index)
+
+    def from_machine_id(self, machine_id):
+        for item in self.items:
+            if item.machineIdentifier == machine_id:
+                return item
+        return None
