@@ -56,6 +56,11 @@ class CollectionItem(DataNode):
     pass
 
 
+@register_viewgroup('Country')
+class CountryItem(DataNode):
+    pass
+
+
 @register_viewgroup('Server')
 class ServerItem(DataNode):
     @property
