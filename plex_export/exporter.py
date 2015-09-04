@@ -37,6 +37,8 @@ group = parser.add_argument_group("Input/Output")
 group.add_argument('plexurl', help='Url to your plex server. Optionally add ?X-Plex-Token=<token> if your plex server requires auth.')
 group.add_argument('template', help='Path to the template to parse. The directory of this file will be added to the list of template directories unless --builtin is specified')
 group.add_argument('outfile', nargs='?', type=argparse.FileType('w'))
+group.add_argument('-c', '--cache', action='store', dest='cache', choices=['sqlite', 'memory'], default=None, required=False, help='Cache requests using this method (memory is not suggested)')
+group.add_argument('-C', '--cachetime', action='store', dest='cachetime', type=int, default=300, required=False, help='Cache requests for CACHETIME seconds')
 group = parser.add_argument_group("Template configuration")
 group.add_argument('-d', '--dir', action='append', dest='dirnames', default=[], help='Add DIRNAMES to the list of template directories. Useful when extending or including other templates. This option can be specified multiple times.')
 group.add_argument('-p', '--package', action='append', dest='packages', default=[], help='Add PACKAGES to the list of python packages to search for templates. Please note that the "templates" directory under each package is searched in. This option can be specified multiple times.')
@@ -44,6 +46,7 @@ group.add_argument('-f', '--follow-symlinks', action='store_true', dest='symlink
 group.add_argument('--relative', action='store_true', dest='relative', help='Assume that <template> is relative to the built-in template folders')
 group.add_argument('--use-builtin-folders', action='store_true', dest='builtin_templates', help='Include the standard built-in folders')
 group.add_argument('-o', '--option', action=KeyValueOption, dest='options', help='Define variables to be passed directly to the template in the format key=value. This option can be specified multiple times.')
+
 
 DEFAULT_EXTENSIONS = [
     'jinja2.ext.loopcontrols',
@@ -74,7 +77,7 @@ def get_loader(options):
 
 
 def get_plex(options):
-    plex = PlexServer(options.plexurl)
+    plex = PlexServer(options.plexurl, cache=options.cache, cachetime=options.cachetime)
     try:
         plex.load()
     except:
