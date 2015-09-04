@@ -15,11 +15,24 @@ try:
     from ..version_info import __version__
 except ImportError:
     __version__ = '0.0.0'
+try:
+    from requests_cache import CachedSession
+except:
+    CachedSession = None
 NO_DEFAULT = object()
 
 DEFAULT_HEADERS = {
     'X-Plex-Device-Name': 'plex-export (%s)' % __version__
 }
+
+
+class RequestConfig(object):
+    def __init__(self, session=None):
+        self._session = session or requests.Session()
+        self._session.headers.update(DEFAULT_HEADERS)
+
+    def get(self, *args, **kwargs):
+        return self._session.get(*args, **kwargs)
 
 
 class RequestBase(object):
@@ -31,6 +44,7 @@ class RequestBase(object):
         self._xml = None
         self._url_parts = None
         self._headers = None
+        self._config = None
         if isinstance(base, six.string_types):
             base_url = base
             self._url_parts = list(parse.urlsplit(base_url))
@@ -39,6 +53,7 @@ class RequestBase(object):
             self._has_token = base.has_token
             self._url_parts = base._url_parts[:]
             self._headers = base._headers
+            self._config = base.config
         if relative:
             scheme, netloc, path, qs, fragment = parse.urlsplit(relative)
             if path:
@@ -71,8 +86,14 @@ class RequestBase(object):
     def has_token(self):
         return self._has_token
 
+    @property
+    def config(self):
+        if not self._config:
+            self._config = RequestConfig()
+        return self._config
+
     def _request(self):
-        return requests.get(self.url, headers=self._headers or DEFAULT_HEADERS)
+        return self.config.get(self.url)
 
     @property
     def xml(self):
@@ -181,6 +202,17 @@ class BaseDirectory(RequestBase):
 
 
 class PlexServer(BaseDirectory):
+    def __init__(self, url, cache=False, cachetime=300):
+        super(PlexServer, self).__init__(url)
+        session = None  # use the default session
+        cachetime = cachetime or None
+        if CachedSession and cache and isinstance(cache, six.string_types):
+            if cache == 'memory':
+                session = CachedSession(cache, cache, cachetime)
+            elif cache == 'sqlite':
+                session = CachedSession('request-cache', 'sqlite', cachetime, fast_save=True)
+        self._config = RequestConfig(session=session)
+
     @property
     def headers(self):
         return self._headers
