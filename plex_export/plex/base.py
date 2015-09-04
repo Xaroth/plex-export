@@ -132,6 +132,7 @@ class BaseDirectory(RequestBase):
         key = element.attrib.get('key', None)
         if key:
             url_key = _join_plex(self._url_parts[2], key)
+            url_key = url_key.lstrip('/')
             if url_key in self._keygroups:
                 child = self._keygroups[url_key]
         item = child(self, key, element)
