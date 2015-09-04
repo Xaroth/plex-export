@@ -1,0 +1,5 @@
+{% with movies=server.library.sections.movie.all %}
+{%- for movie in movies %}
+{% include 'movies/movie.txt' %}
+{% endfor %}
+{%- endwith %}

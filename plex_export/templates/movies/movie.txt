@@ -1,0 +1,22 @@
+{{movie.title}} ({{movie.year}}{% if movie.Country %} - {{movie.Country|join(", ")}}{% endif %})
+{%- if not hide_genres and movie.Genre %}
+  Genres: {{movie.Genre|join(", ")}}
+{%- endif %}
+{%- if show_staff %}
+{%- if movie.Writer %}
+  Writers:
+{%- for writer in movie.Writer %}
+    {{writer}}
+{%- endfor %}
+{%- endif %}
+{%- if movie.Producer %}
+  Producers:
+{%- for producer in movie.Producer %}
+    {{producer}}
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+{%- if not hide_summary %}
+  Summary:
+{{movie.summary|wordwrap(75)|indent(4, True)}}
+{%- endif %}
