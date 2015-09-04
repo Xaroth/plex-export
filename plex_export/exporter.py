@@ -4,6 +4,7 @@ import os
 import argparse
 from os.path import abspath
 from jinja2 import Environment, FileSystemLoader, ChoiceLoader, PackageLoader
+from datetime import datetime
 
 from . import PlexServer
 
@@ -94,6 +95,7 @@ def export(argv=None):
         'library': plex.library,
         'current_server': plex.servers.from_machine_id(plex.machineIdentifier),
         'version': __version__,
+        'now': datetime.now(),
     })
     rendered = template.render(**data)
     if options.outfile:
