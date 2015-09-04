@@ -31,16 +31,18 @@ class KeyValueOption(argparse.Action):
 
 
 parser = argparse.ArgumentParser(description='Exports your current library to a template html file.')
-parser.add_argument('plexurl', help='Url to your plex server. Optionally add ?X-Plex-Token=<token> if your plex server requires auth.')
-parser.add_argument('template', help='Path to the template to parse. The directory of this file will be added to the list of template directories unless --builtin is specified')
-parser.add_argument('outfile', nargs='?', type=argparse.FileType('w'))
-parser.add_argument('-d', '--dir', action='append', dest='dirnames', default=[], help='Add DIRNAMES to the list of template directories. Useful when extending or including other templates')
-parser.add_argument('-p', '--package', action='append', dest='packages', default=[], help='Add PACKAGES to the list of python packages to search for templates. Please note that the "templates" directory under each package is searched in')
-parser.add_argument('-f', '--follow-symlinks', action='store_true', dest='symlinks', help='Tell the template loader to follow symlinks')
 parser.add_argument('--version', action='version', version='%%(prog)s version %s' % __version__)
-parser.add_argument('--relative', action='store_true', dest='relative', help='Assume that <template> is relative to the built-in template folders')
-parser.add_argument('--use-builtin-folders', action='store_true', dest='builtin_templates', help='Include the standard built-in folders')
-parser.add_argument('-o', '--option', action=KeyValueOption, dest='options', help='Define variables to be passed directly to the template in the format key=value')
+group = parser.add_argument_group("Input/Output")
+group.add_argument('plexurl', help='Url to your plex server. Optionally add ?X-Plex-Token=<token> if your plex server requires auth.')
+group.add_argument('template', help='Path to the template to parse. The directory of this file will be added to the list of template directories unless --builtin is specified')
+group.add_argument('outfile', nargs='?', type=argparse.FileType('w'))
+group = parser.add_argument_group("Template configuration")
+group.add_argument('-d', '--dir', action='append', dest='dirnames', default=[], help='Add DIRNAMES to the list of template directories. Useful when extending or including other templates. This option can be specified multiple times.')
+group.add_argument('-p', '--package', action='append', dest='packages', default=[], help='Add PACKAGES to the list of python packages to search for templates. Please note that the "templates" directory under each package is searched in. This option can be specified multiple times.')
+group.add_argument('-f', '--follow-symlinks', action='store_true', dest='symlinks', help='Tell the template loader to follow symlinks')
+group.add_argument('--relative', action='store_true', dest='relative', help='Assume that <template> is relative to the built-in template folders')
+group.add_argument('--use-builtin-folders', action='store_true', dest='builtin_templates', help='Include the standard built-in folders')
+group.add_argument('-o', '--option', action=KeyValueOption, dest='options', help='Define variables to be passed directly to the template in the format key=value. This option can be specified multiple times.')
 
 DEFAULT_EXTENSIONS = [
     'jinja2.ext.loopcontrols',
